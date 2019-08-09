@@ -5,6 +5,8 @@ rm(list=ls())
 # Load library ggplot2
 library("ggplot2")
 
+source('C:/Design2Code/TLF-Playground/TLF-Playground/R/PlotConfigurationTests.R')
+
 #-------------------------------------------------
 # Example of definition of  Data for Cmax Ratio plot
 # Hopefully, performed previoulsy by the OSP Suite
@@ -78,6 +80,8 @@ CmaxRatio.Configuration <- list(
     "Font" = "30",
     "Position" = "Center")
 )
+# Use R6 class to define easliy a PK Ratio configuration
+CmaxRatio.Configuration <- PKRatioPlotConfiguration$new()
 
 # The option theme from ggplot allow to update some features of the plot
 themetest <- function()
@@ -92,18 +96,13 @@ themetest <- function()
 
 configtest <- function(figLayer, plotconfiguration)
 {
-  if (match(plotconfiguration$Axes$YAxis$Scaling, c("log", "Log", "LOG"), nomatch=FALSE))
-  {figLayer <- figLayer + scale_y_log10()}
-  if (match(plotconfiguration$Axes$XAxis$Scaling, c("log", "Log", "LOG"), nomatch=FALSE))
-  {figLayer <- figLayer + scale_x_log10()}
-  
   # Test of Watermark
   figLayer <- figLayer + annotate(geom = "text",
                                   x = -Inf, # To find a way to center Watermark
                                   y = -Inf,
-                                  label = plotconfiguration$Watermark$Text,
-                                  color = "grey", fontface='bold', size=15, alpha=0.5,
-                                  angle = 45)
+                                  label = plotconfiguration$watermark,
+                                  color = "lightblue", fontface='bold', size=12, alpha=1,
+                                  angle = 30)
   
 }
 
@@ -120,7 +119,7 @@ plotPKRatio <- function(data, metadata, datamapping, plotconfiguration)
   
   # Add Plot Configuration layers
   # This might be done by calling a theme function later on
-  pkrp <- pkrp + labs(title="PK Ratio Plot", subtitle = paste("Date:", format(Sys.Date(), "%m-%d-%Y")), x=plotconfiguration$Axes$XAxis$Caption, y=plotconfiguration$Axes$YAxis$Caption, color = CmaxRatio.DataMapping$Grouping$Color)
+  pkrp <- pkrp + labs(title=plotconfiguration$title, subtitle = paste("Date:", format(Sys.Date(), "%m-%d-%Y")), x=plotconfiguration$xlabel, y=plotconfiguration$ylabel, color = CmaxRatio.DataMapping$Grouping$Color)
   
   # Plot specific ratio lines
   pkrp <- pkrp + geom_hline(yintercept=1, linetype="solid", color = "black", size = 1.5)
@@ -132,11 +131,22 @@ plotPKRatio <- function(data, metadata, datamapping, plotconfiguration)
   # Plot specific ratio lines
   pkrp <- pkrp + geom_point()
   
+  # Reposition Watermark (have to find a better way)
+  # Layer is first one for Watermark, Data is Position of center of Watermark
+  # To create a generic function to do it
+  pkrp$layers[[1]]$data$x <- mean(data[,datamapping$Axes$X])
+  pkrp$layers[[1]]$data$y <- mean(data[,datamapping$Axes$Y])
+  
+  # Save plot as a specific format
+  #ggsave(filename = 'C:/Design2Code/TLF-Playground/TLF-Playground/R/TestPKRatio.png', plot = pkrp, width = 20, height = 10, units = "cm")
+  
   # Show plot
   pkrp
 }
 
+
+
 #-------------------------------------------------
 # Test example of previous blocks
-plotPKRatio(data = CmaxRatio.Data, metadata = CmaxRatio.MetaData, 
+pkrp <- plotPKRatio(data = CmaxRatio.Data, metadata = CmaxRatio.MetaData, 
             datamapping = CmaxRatio.DataMapping, plotconfiguration = CmaxRatio.Configuration)
