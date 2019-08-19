@@ -2,10 +2,23 @@
 # Similar to clear from Matlab
 rm(list=ls())
 
+# Set your folder to test folder:
+setwd('C:/Design2Code/TLF-Playground/TLF-Playground/R/')
+
 # Load library ggplot2
 library("ggplot2")
+#library(tlf)
+# Later on tlf library will be loaded, so far, only loading 
+# methods by sourcing R scritps within the folder
 
-source('C:/Design2Code/TLF-Playground/TLF-Playground/R/PlotConfigurationTests.R')
+source('utils.R')
+source('getLabelWithUnit.R')
+source('SetLegendPosition.R')
+source('plotconfiguration.R')
+source('pkratio-plotconfiguration.R')
+source('xy-datamapping.R')
+source('pkratio-datamapping.R')
+source('plot-pkratio.R')
 
 #-------------------------------------------------
 # Example of definition of  Data for Cmax Ratio plot
@@ -23,9 +36,15 @@ CmaxRatio.Data <- data.frame(
   "Simulated" = c(12,9,5),
   "Observed" = c(10,8,5)
 )
+
+# TO BE DISCUSSED
+# The variable "Ratio" and its metadata can be calculated through the OSP-Library 
+# But currently, they are implmented in this test script
 CmaxRatio.Data$Ratio <- CmaxRatio.Data$Simulated/CmaxRatio.Data$Observed
 
-# Option to save/load Cmax Ratio table
+# Save/Load Data to/from a csv
+#write.csv(CmaxRatio.Data, 'CmaxRatio_Data.csv', row.names = FALSE)
+#CmaxRatio.Data2 <- read.csv('CmaxRatio_Data.csv')
 
 #-------------------------------------------------
 # Example of definition of MetaData
@@ -46,107 +65,20 @@ CmaxRatio.MetaData <- list(
 # Create GMFE as a MetaData for Ratio 
 CmaxRatio.MetaData$Ratio$GMFE <- 10^(mean(abs(log10(CmaxRatio.Data$Ratio))))
 
-#-------------------------------------------------
-# Example of definition of Data Mapping
-CmaxRatio.DataMapping <- list(
-  "Axes" = list("X"="Age", "Y"=c("Ratio")),
-  "Unit" = list("X"="yrs", "Y"=c(NULL)),
-  "Grouping" = list("Color"= "Gender", "Symbol"=c("Compound", "Dose"))
-)
+# Save/Load MetaData to/from a json
+#cat(jsonlite::toJSON(CmaxRatio.MetaData, pretty = TRUE, auto_unbox = TRUE), file = "CmaxRatio_MetaData.json")
+#CmaxRatio.MetaData2 <- jsonlite::fromJSON("CmaxRatio_MetaData.json")
+
 
 #-------------------------------------------------
-# Define Configuration
-CmaxRatio.Configuration <- list(
-  "Axes" = list(
-    "XAxis" = list(
-      "Scaling" = "Lin",
-      "Caption" = paste0(CmaxRatio.DataMapping$Axes$X, " [", CmaxRatio.DataMapping$Unit$X, "]"),
-      "Font" = 12,
-      "Ticks" = NA,
-      "RangeMode" = "Auto",
-      "Range" = NA),
-    "YAxis" = list(
-      "Scaling" = "Lin",
-      "Caption" = "Simulated Cmax / Observed Cmax",
-      "Font" = 12,
-      "Ticks" = NA,
-      "RangeMode" = "Auto",
-      "Range" = NA)),
-  "Legend" = list(
-    "Font" = 12,
-    "Position" = "auto"),
-  "Watermark" = list(
-    "Text" = "WATERMARK !",
-    "Font" = "30",
-    "Position" = "Center")
-)
-# Use R6 class to define easliy a PK Ratio configuration
+# Define Configuration & Mapping from R6 class
 CmaxRatio.Configuration <- PKRatioPlotConfiguration$new()
-
-# The option theme from ggplot allow to update some features of the plot
-themetest <- function()
-{
-  
-  theme_classic() + theme(plot.background = element_rect(fill = "white"),
-                          legend.justification = c("right", "center"),
-                          axis.title = element_text(size = 16, face = "bold"),
-                          axis.text = element_text(size = 10, face = "bold"),
-                          aspect.ratio = 0.65) 
-}
-
-configtest <- function(figLayer, plotconfiguration)
-{
-  # Test of Watermark
-  figLayer <- figLayer + annotate(geom = "text",
-                                  x = -Inf, # To find a way to center Watermark
-                                  y = -Inf,
-                                  label = plotconfiguration$watermark,
-                                  color = "lightblue", fontface='bold', size=12, alpha=1,
-                                  angle = 30)
-  
-}
-
-
-
-#-------------------------------------------------
-# Example of definition of PK Ratio plot function
-plotPKRatio <- function(data, metadata, datamapping, plotconfiguration)
-{
-  # Create ggplot object based on data and datamapping
-  pkrp <- ggplot(data, aes(x=data[,datamapping$Axes$X], y=data[,datamapping$Axes$Y], color=data[,datamapping$Grouping$Color])) 
-  pkrp <- pkrp + themetest()
-  pkrp <- configtest(pkrp, plotconfiguration)
-  
-  # Add Plot Configuration layers
-  # This might be done by calling a theme function later on
-  pkrp <- pkrp + labs(title=plotconfiguration$title, subtitle = paste("Date:", format(Sys.Date(), "%m-%d-%Y")), x=plotconfiguration$xlabel, y=plotconfiguration$ylabel, color = CmaxRatio.DataMapping$Grouping$Color)
-  
-  # Plot specific ratio lines
-  pkrp <- pkrp + geom_hline(yintercept=1, linetype="solid", color = "black", size = 1.5)
-  pkrp <- pkrp + geom_hline(yintercept=1.5, linetype="dashed", color = "blue")
-  pkrp <- pkrp + geom_hline(yintercept=1/1.5, linetype="dashed", color = "blue")
-  pkrp <- pkrp + geom_hline(yintercept=2, linetype="dashed", color = "red")
-  pkrp <- pkrp + geom_hline(yintercept=0.5, linetype="dashed", color = "red")
-  
-  # Plot specific ratio lines
-  pkrp <- pkrp + geom_point()
-  
-  # Reposition Watermark (have to find a better way)
-  # Layer is first one for Watermark, Data is Position of center of Watermark
-  # To create a generic function to do it
-  pkrp$layers[[1]]$data$x <- mean(data[,datamapping$Axes$X])
-  pkrp$layers[[1]]$data$y <- mean(data[,datamapping$Axes$Y])
-  
-  # Save plot as a specific format
-  #ggsave(filename = 'C:/Design2Code/TLF-Playground/TLF-Playground/R/TestPKRatio.png', plot = pkrp, width = 20, height = 10, units = "cm")
-  
-  # Show plot
-  pkrp
-}
-
-
+CmaxRatio.DataMapping <- PKRatioDataMapping$new(grouping = c("Gender", "Dose"))
 
 #-------------------------------------------------
 # Test example of previous blocks
-pkrp <- plotPKRatio(data = CmaxRatio.Data, metadata = CmaxRatio.MetaData, 
-            datamapping = CmaxRatio.DataMapping, plotconfiguration = CmaxRatio.Configuration)
+pkrp <- plotPKRatio(data = CmaxRatio.Data, metaData = CmaxRatio.MetaData, 
+            dataMapping = CmaxRatio.DataMapping, plotConfiguration = CmaxRatio.Configuration)
+
+# Save plot as a specific format
+#ggsave(filename = 'C:/Design2Code/TLF-Playground/TLF-Playground/R/TestPKRatio.png', plot = pkrp, width = 20, height = 10, units = "cm")
