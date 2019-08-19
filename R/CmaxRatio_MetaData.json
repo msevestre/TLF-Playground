@@ -1,0 +1,59 @@
+{
+  "IndividualID": {
+    "Unit": null,
+    "Dimension": null,
+    "VariableType": "numeric"
+  },
+  "Population": {
+    "Unit": null,
+    "Dimension": null,
+    "VariableType": "character"
+  },
+  "Gender": {
+    "Unit": null,
+    "Dimension": null,
+    "VariableType": "logical"
+  },
+  "Age": {
+    "Unit": null,
+    "Dimension": null,
+    "VariableType": "numeric"
+  },
+  "Compound": {
+    "Unit": null,
+    "Dimension": null,
+    "VariableType": "character"
+  },
+  "Dose": {
+    "Unit": null,
+    "Dimension": null,
+    "VariableType": "numeric"
+  },
+  "Organ": {
+    "Unit": null,
+    "Dimension": null,
+    "VariableType": "character"
+  },
+  "Compartment": {
+    "Unit": null,
+    "Dimension": null,
+    "VariableType": "character"
+  },
+  "Simulated": {
+    "Unit": "g/mL",
+    "Dimension": "Concentration",
+    "VariableType": "numeric"
+  },
+  "Observed": {
+    "Unit": "g/mL",
+    "Dimension": "Concentration",
+    "LLOQ": 2,
+    "VariableType": "numeric"
+  },
+  "Ratio": {
+    "Unit": {},
+    "Dimension": "Fraction",
+    "VariableType": "numeric",
+    "GMFE": 1.1052
+  }
+}
