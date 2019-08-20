@@ -9,7 +9,7 @@
 #' SetLegendPosition set a Legend Position in a plot (case insensitive)
 #' Default legend setting is within plot on the top right corner
 #' @export
-SetLegendPosition <- function(PlotHandle, 
+setLegendPosition <- function(PlotHandle, 
                               Location = "inside", 
                               X.Location = NA, 
                               Y.Location = NA, 

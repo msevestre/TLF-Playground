@@ -13,7 +13,8 @@ library("ggplot2")
 
 source('utils.R')
 source('getLabelWithUnit.R')
-source('SetLegendPosition.R')
+source('setLegendPosition.R')
+source('getGrouping.R')
 source('plotconfiguration.R')
 source('pkratio-plotconfiguration.R')
 source('xy-datamapping.R')
@@ -73,7 +74,9 @@ CmaxRatio.MetaData$Ratio$GMFE <- 10^(mean(abs(log10(CmaxRatio.Data$Ratio))))
 #-------------------------------------------------
 # Define Configuration & Mapping from R6 class
 CmaxRatio.Configuration <- PKRatioPlotConfiguration$new()
-CmaxRatio.DataMapping <- PKRatioDataMapping$new(grouping = c("Gender", "Dose"))
+# Example with a different theme changing
+#CmaxRatio.Configuration$TLFtheme()
+CmaxRatio.DataMapping <- PKRatioDataMapping$new(colorGrouping = "Gender", sizeGrouping = "Dose")
 
 #-------------------------------------------------
 # Test example of previous blocks
