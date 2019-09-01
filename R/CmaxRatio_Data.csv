@@ -1,0 +1,4 @@
+"IndividualID","Population","Gender","Age","Compound","Dose","Organ","Compartment","Simulated","Observed","Ratio"
+1,"Asian","M",1,"Aspirin",2,"VenousBlood","Plasma",12,10,1.2
+2,"Asian","F",2,"Aspirin",3,"VenousBlood","Plasma",9,8,1.125
+3,"Asian","F",3,"Aspirin",4,"VenousBlood","Plasma",5,5,1
