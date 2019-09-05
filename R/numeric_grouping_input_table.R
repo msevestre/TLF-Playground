@@ -2,30 +2,6 @@ library(stringr)
 library(ggplot2)
 
 
-boundList <- R6::R6Class("boundList", 
-                         public = list(
-                           bounds = NULL,
-                           
-                           initialize = function(lowerBounds = NULL , upperBounds = NULL) {
-                             
-                             if ( (!(is.numeric(lowerBounds)))  | (!(is.numeric(upperBounds)))  ){
-                               stop("boundList inputs must be numeric.")
-                             }
-                             
-                             if (!( length(lowerBounds) == length(upperBounds) )){
-                               stop("boundList inputs must be of the same length.")
-                             }
-                             
-                             self$bounds  <- vector("list", length(lowerBounds))
-                             
-                             for (n in seq(1,length(lowerBounds))){
-                               self$bounds[[n]] <- c(lowerBounds[n],upperBounds[n])  
-                             }
-                           }
-                         )
-)
-
-
 
 generate_df_column <-function(r,output0,output1) {
   
@@ -81,6 +57,14 @@ non_list_fun <- function(){
 }
 
 
+check_if_not_numeric <- function(vec,msg="Input must be numeric."){
+  if (!is.numeric(vec)){
+    stop(msg)
+  }
+} 
+
+ 
+
 addCaptionsColumn <- function(df,dfinp){
   
   sel_df_cols <- df[colnames( dfinp[ seq ( 1,ncol(dfinp)-1 )] )] #get columns from df corresponding to column headings in dfinp (excluding the last column heading in dfinp)
@@ -91,33 +75,39 @@ addCaptionsColumn <- function(df,dfinp){
     for (n in seq(1,ncol(sel_df_cols))){#for each column
       col_head <- colnames(sel_df_cols[n]) #get column header
       
-      if ( is.list(dfinp[[col_head]]) ) { #check that df column and dfinp column are of the same type
+      
+      if ( is.list(dfinp[[col_head]]) ) { #case where a list is supplied for binning
         
-        print(is.numeric(sel_df_cols[[col_head]]))
-        print(all(sapply(dfinp[[col_head]],function(x) (is.numeric(x)) & (length(x)==2) & ( x[2]>x[1] ) )))
-        if (   ( is.numeric(sel_df_cols[[col_head]])) & (all(sapply(dfinp[[col_head]],function(x) (is.numeric(x)) & (length(x)==2) & ( x[2]>x[1] ) )))    ) {
-          for (m in seq(1,nrow(df))){#for each row of data
-            if ( (sel_df_cols[[col_head]][m] >= dfinp[[col_head]][[k]][1]) & (sel_df_cols[[col_head]][m] <= dfinp[[col_head]][[k]][2])   ){ #if df row entry matches dfinp row entry
-              logic_matrix[m,n] <- TRUE #set corresponding logic row column to true
-            }
-          }
+        check_if_not_numeric(sel_df_cols[[col_head]] , msg = "Dataframe column entries to be binned must be numeric.") #check that data points to be binned are numeric
+        
+        sapply( dfinp[[col_head]], check_if_not_numeric , msg = "Bin limits must be numeric") #check that all bin limits are numeric
+        
+        if (!all(sapply(dfinp[[col_head]],function(x) return(x[2]>x[1])))) { #check that all bin limits are in increasing order
+          stop("Bin limits must be increasing.")
         }
-        else{
-          stop("A caption dataframe column must either be a list of increasing two-column atomic vectors or a vector of the same type as its corresponding data column.")
-        }
-      } else {
-        for (m in seq(1,nrow(df))){#for each row of data
-          if ( sel_df_cols[[col_head]][m] == dfinp[[col_head]][k]  ){ #if df row entry matches dfinp row entry
-            logic_matrix[m,n] <- TRUE #set corresponding logic row column to true
-          }
-        }
+        
+        logic_matrix[,n]<-sapply( sel_df_cols[[col_head]], function(x) return( (x >= dfinp[[col_head]][[k]][1]) & (x <= dfinp[[col_head]][[k]][2])   )  )   
+
+ 
+        
+      } else { #case where there is no binning, only matching between caption dataframe entries and data column entries
+        
+        
+        
+        logic_matrix[,n]<-sapply( sel_df_cols[[col_head]], function(x) return(   x == dfinp[[col_head]][k]  ) )   
+        
+ 
+        
       }
     }
+
     for (m in seq(1,nrow(df))){#for each row of data
       if (all(logic_matrix[m,])){ #if entire df row matches dfinp row
         df_caption_factors[m] <- df_inp_levels[k] #set factor level in df_caption_factors
       }
     }
+    
+    
   } 
   
   CaptionString<-colnames(dfinp[ncol(dfinp)])
@@ -127,11 +117,6 @@ addCaptionsColumn <- function(df,dfinp){
   
   return(df)
 }
-
-
-
-
-
 
 N<-20;
 
@@ -151,8 +136,7 @@ df[["PKratio"]]<-(df$Simulated)/(df$Observed)
 
 
 
-bnd<-boundList$new(c(3,7),c(6,8)) 
-
+print(df)
 
 
 
@@ -161,9 +145,11 @@ myCaptionString <- "Special cases"
 names(dfinp)[names(dfinp) == "Caption"]<- myCaptionString
 df<-addCaptionsColumn(df,dfinp)
 pkrp<-plot_pkrp( na.omit(df) , colorGrouping=myCaptionString , shapeGrouping=NULL , sizeGrouping=NULL )
+print(df)
 show(pkrp)
 
-dfinp_bnds<-data.frame(   "Age" = I(  bnd$bounds ) ,  "Caption" = c("Patients aged 3-6" , "Patients aged 7-8") )
+ageBounds<-list(c(3,6),c(7,8))
+dfinp_bnds<-data.frame(   "Age" = I(  ageBounds ) ,  "Caption" = c("Patients aged 3-6" , "Patients aged 7-8") )
 myCaptionString <- "Age bounds"
 names(dfinp_bnds)[names(dfinp_bnds) == "Caption"]<- myCaptionString
 df<-addCaptionsColumn(df,dfinp_bnds)
