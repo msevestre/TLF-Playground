@@ -63,7 +63,7 @@ check_if_not_numeric <- function(vec,msg="Input must be numeric."){
   }
 } 
 
- 
+
 
 addCaptionsColumn <- function(df,dfinp){
   
@@ -87,8 +87,6 @@ addCaptionsColumn <- function(df,dfinp){
         }
         
         logic_matrix[,n]<-sapply( sel_df_cols[[col_head]], function(x) return( (x >= dfinp[[col_head]][[k]][1]) & (x <= dfinp[[col_head]][[k]][2])   )  )   
-
- 
         
       } else { #case where there is no binning, only matching between caption dataframe entries and data column entries
         
@@ -96,11 +94,11 @@ addCaptionsColumn <- function(df,dfinp){
         
         logic_matrix[,n]<-sapply( sel_df_cols[[col_head]], function(x) return(   x == dfinp[[col_head]][k]  ) )   
         
- 
+        
         
       }
     }
-
+    
     for (m in seq(1,nrow(df))){#for each row of data
       if (all(logic_matrix[m,])){ #if entire df row matches dfinp row
         df_caption_factors[m] <- df_inp_levels[k] #set factor level in df_caption_factors
