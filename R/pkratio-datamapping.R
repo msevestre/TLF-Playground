@@ -5,15 +5,34 @@
 PKRatioDataMapping <- R6::R6Class("PKRatioDataMapping",
   inherit = XYDataMapping,
   public = list(
+    
     colorGrouping = NULL,
     sizeGrouping = NULL,
     shapeGrouping = NULL,
       
+    colorGroupingDataFrame = NULL,
+    sizeGroupingDataFrame = NULL,
+    shapeGroupingDataFrame = NULL,
+    
     # Example of how to do some other stuff
-    initialize = function(x = "Age", y="Ratio", colorGrouping=NULL, sizeGrouping = NULL, shapeGrouping = NULL) {
+    initialize = function(x = "Age", y="Ratio", colorGrouping=NULL, sizeGrouping = NULL, shapeGrouping = NULL, colorGroupingDataFrame = NULL, sizeGroupingDataFrame = NULL, shapeGroupingDataFrame = NULL) {
+      
+      
+      
+      
+      
+      self$colorGroupingDataFrame = colorGroupingDataFrame,
+      self$sizeGroupingDataFrame  = sizeGroupingDataFrame,
+      self$shapeGroupingDataFrame = shapeGroupingDataFrame,
+      
       self$colorGrouping <- colorGrouping
       self$sizeGrouping <- sizeGrouping
       self$shapeGrouping <- shapeGrouping
+      
+      self$colorGroupingDataFrame = colorGroupingDataFrame,
+      self$sizeGroupingDataFrame  = sizeGroupingDataFrame,
+      self$shapeGroupingDataFrame = shapeGroupingDataFrame,
+      
       super$initialize(x, y)
     }
   )

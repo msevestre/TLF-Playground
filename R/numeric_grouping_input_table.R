@@ -48,15 +48,6 @@ plot_pkrp <-function(df,colorGrouping=NULL,shapeGrouping=NULL,sizeGrouping=NULL)
 }
 
 
-list_fun <- function(){
-  
-}
-
-non_list_fun <- function(){
-  
-}
-
-
 check_if_not_numeric <- function(vec,msg="Input must be numeric."){
   if (!is.numeric(vec)){
     stop(msg)
