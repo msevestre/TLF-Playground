@@ -56,7 +56,7 @@ check_if_not_numeric <- function(vec,msg="Input must be numeric."){
 
 
 
-addCaptionsColumn <- function(df,dfinp){
+addCaptionsColumn <- function(df,dfinp,captionString = NULL){
   
   sel_df_cols <- df[colnames( dfinp[ seq ( 1,ncol(dfinp)-1 )] )] #get columns from df corresponding to column headings in dfinp (excluding the last column heading in dfinp)
   df_caption_factors <- rep(0,nrow(df)) #vector that is to be populated with factor levels that determine caption
@@ -99,10 +99,14 @@ addCaptionsColumn <- function(df,dfinp){
     
   } 
   
-  CaptionString<-colnames(dfinp[ncol(dfinp)])
-  df[[CaptionString]]<- as.factor(rep(NA,nrow(df)))
-  levels(df[[CaptionString]])<-dfinp[[CaptionString]]
-  df[[CaptionString]][ df_caption_factors != 0 ] <- dfinp[[CaptionString]][  df_caption_factors[df_caption_factors!= 0 ]   ]
+  if (is.null(captionString))
+  {
+    captionString<-colnames(dfinp[ncol(dfinp)])
+  }
+  
+  df[[captionString]]<- as.factor(rep(NA,nrow(df)))
+  levels(df[[captionString]])<-dfinp[[captionString]]
+  df[[captionString]][ df_caption_factors != 0 ] <- dfinp[[captionString]][  df_caption_factors[df_caption_factors!= 0 ]   ]
   
   return(df)
 }
