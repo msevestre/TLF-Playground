@@ -39,6 +39,10 @@ addCaptionsColumn <- function(df,dfinp,captionString = NULL){
         
         sapply( dfinp[[col_head]], check_if_not_numeric , msg = "Bin limits must be numeric") #check that all bin limits are numeric
         
+        if (!all(sapply(dfinp[[col_head]],function(x) return( length(x) == 2 )))) { #check that all bin limits are of length 2.
+          stop("Each element of bin limits list must be a vector of length 2.")
+        }
+        
         if (!all(sapply(dfinp[[col_head]],function(x) return(x[2]>x[1])))) { #check that all bin limits are in increasing order
           stop("Bin limits must be increasing.")
         }
